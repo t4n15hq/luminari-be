@@ -1,0 +1,28 @@
+{
+  "name": "luminari-be",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/t4n15hq/luminari-be.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/t4n15hq/luminari-be/issues"
+  },
+  "homepage": "https://github.com/t4n15hq/luminari-be#readme",
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "^6.11.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "prisma": "^6.11.1"
+  }
+}
