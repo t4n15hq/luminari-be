@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,22 +8,22 @@ datasource db {
 }
 
 model Document {
-  id              String      @id @default(uuid())
+  id              String       @id @default(uuid())
   type            DocumentType
   title           String
-  disease         String?     // e.g., "Psoriasis"
-  country         String?     // e.g., "United States"
-  region          String?     // e.g., "North America"
-  protocolId      String?     // For protocols, to store protocol_id if available
-  documentType    String?     // e.g., "IND", "NDA", "Protocol", "Study Design", "BLA", etc.
-  content         String      // The main text (full document, or summary if split)
-  cmcSection      String?     // For docs with a CMC section
-  clinicalSection String?     // For docs with a Clinical section
-  sections        Json?       // For all other structured sections (e.g., { "quality": "...", "riskManagement": "...", ... })
-  userId          String?     // (Optional) For multi-user support
-  tags            String[]    // (Optional) For search/filtering
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  disease         String?
+  country         String?
+  region          String?
+  protocolId      String?
+  documentType    String?
+  content         String
+  cmcSection      String?
+  clinicalSection String?
+  sections        Json?
+  userId          String?
+  tags            String[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 }
 
 enum DocumentType {
