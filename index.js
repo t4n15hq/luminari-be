@@ -1,18 +1,11 @@
 require('dotenv').config();
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const prisma = require('./lib/prisma');
 
 const app = express();
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
-});
 
 app.use(cors({
   origin: [
@@ -76,6 +69,22 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
+// Database operation with retry logic
+async function withRetry(operation, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await operation();
+    } catch (error) {
+      console.log(`Database operation failed (attempt ${i + 1}/${maxRetries}):`, error.message);
+      
+      if (i === maxRetries - 1) throw error;
+      
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+
 // Login endpoint
 app.post('/auth/login', async (req, res) => {
   try {
@@ -85,7 +94,10 @@ app.post('/auth/login', async (req, res) => {
       return res.status(400).json({ error: 'Username and password required' });
     }
 
-    const user = await prisma.user.findUnique({ where: { username } });
+    const user = await withRetry(async () => {
+      return await prisma.user.findUnique({ where: { username } });
+    });
+    
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -107,8 +119,8 @@ app.post('/auth/login', async (req, res) => {
       user: { id: user.id, username: user.username }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Authentication service temporarily unavailable' });
   }
 });
 
@@ -186,6 +198,16 @@ app.delete('/documents/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Database connection test
+async function testDatabaseConnection() {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('✅ Database connection successful');
+  } catch (error) {
+    console.error('❌ Database connection failed:', error.message);
+  }
+}
+
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Received SIGINT, closing Prisma connection...');
@@ -201,6 +223,7 @@ process.on('SIGTERM', async () => {
 
 // Start the server
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Backend API running on port ${PORT}`);
+  await testDatabaseConnection();
 });
