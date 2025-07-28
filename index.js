@@ -9,7 +9,12 @@ const app = express();
 const prisma = new PrismaClient();
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: [
+    'http://localhost:3000', 
+    'http://127.0.0.1:3000',
+    'https://luminari-frontend.vercel.app',
+    /\.vercel\.app$/
+  ],
   credentials: true
 }));
 app.use(express.json());
