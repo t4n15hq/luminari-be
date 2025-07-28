@@ -112,7 +112,7 @@ app.get('/auth/verify', authenticateToken, (req, res) => {
 });
 
 // Create a new document
-app.post('/documents', async (req, res) => {
+app.post('/documents', authenticateToken, async (req, res) => {
   try {
     const doc = await prisma.document.create({ data: req.body });
     res.status(201).json(doc);
@@ -123,7 +123,7 @@ app.post('/documents', async (req, res) => {
 });
 
 // Get all documents (with optional filters)
-app.get('/documents', async (req, res) => {
+app.get('/documents', authenticateToken, async (req, res) => {
   try {
     const { type, country, region, disease, documentType } = req.query;
     const docs = await prisma.document.findMany({
@@ -144,7 +144,7 @@ app.get('/documents', async (req, res) => {
 });
 
 // Get a document by ID
-app.get('/documents/:id', async (req, res) => {
+app.get('/documents/:id', authenticateToken, async (req, res) => {
   try {
     const doc = await prisma.document.findUnique({ where: { id: req.params.id } });
     if (!doc) return res.status(404).json({ error: 'Document not found' });
@@ -156,7 +156,7 @@ app.get('/documents/:id', async (req, res) => {
 });
 
 // Update a document by ID
-app.put('/documents/:id', async (req, res) => {
+app.put('/documents/:id', authenticateToken, async (req, res) => {
   try {
     const doc = await prisma.document.update({
       where: { id: req.params.id },
@@ -170,7 +170,7 @@ app.put('/documents/:id', async (req, res) => {
 });
 
 // Delete a document by ID
-app.delete('/documents/:id', async (req, res) => {
+app.delete('/documents/:id', authenticateToken, async (req, res) => {
   try {
     await prisma.document.delete({ where: { id: req.params.id } });
     res.json({ message: 'Document deleted' });
