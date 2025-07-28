@@ -52,14 +52,19 @@ app.post('/auth/register', async (req, res) => {
       return res.status(400).json({ error: 'Username and password required' });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { username } });
+    const existingUser = await withRetry(async () => {
+      return await prisma.user.findUnique({ where: { username } });
+    });
+    
     if (existingUser) {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: { username, password: hashedPassword }
+    const user = await withRetry(async () => {
+      return await prisma.user.create({
+        data: { username, password: hashedPassword }
+      });
     });
 
     res.status(201).json({ message: 'User created successfully', userId: user.id });
@@ -69,18 +74,29 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
-// Database operation with retry logic
+// Database operation with retry logic and connection cleanup
 async function withRetry(operation, maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      return await operation();
+      const result = await operation();
+      return result;
     } catch (error) {
       console.log(`Database operation failed (attempt ${i + 1}/${maxRetries}):`, error.message);
       
+      // If it's a prepared statement error, try to clean up
+      if (error.message.includes('prepared statement') && error.message.includes('already exists')) {
+        try {
+          await prisma.$executeRaw`DEALLOCATE ALL`;
+          console.log('Cleaned up prepared statements');
+        } catch (cleanupError) {
+          console.log('Cleanup failed:', cleanupError.message);
+        }
+      }
+      
       if (i === maxRetries - 1) throw error;
       
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      // Wait before retry with exponential backoff
+      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
     }
   }
 }
