@@ -6,7 +6,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL
+    }
+  }
+});
 
 app.use(cors({
   origin: [
@@ -178,6 +184,19 @@ app.delete('/documents/:id', authenticateToken, async (req, res) => {
     console.error(error);
     res.status(400).json({ error: error.message });
   }
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('Received SIGINT, closing Prisma connection...');
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Received SIGTERM, closing Prisma connection...');
+  await prisma.$disconnect();
+  process.exit(0);
 });
 
 // Start the server
