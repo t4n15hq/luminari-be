@@ -273,6 +273,15 @@ const callClaudeAPI = async (systemPrompt, userMessage, maxTokens = 4096) => {
   }
 };
 
+// Extract confidence score from Claude's response
+const extractConfidence = (text) => {
+  const confidenceMatch = text.match(/CONFIDENCE SCORE:\s*(\d+)%/i);
+  if (confidenceMatch) {
+    return parseFloat(confidenceMatch[1]) / 100; // Convert to decimal (0-1)
+  }
+  return null; // Return null if no confidence found
+};
+
 // TIER 1 ENHANCEMENT 1: Enhanced Free Text Processing
 app.post('/claude/text-processing', authenticateToken, async (req, res) => {
   try {
@@ -305,7 +314,9 @@ ENHANCED PROCESSING REQUIREMENTS:
 - Provide structured JSON output for easy integration
 
 OUTPUT FORMAT:
-Return a structured analysis using plain text without markdown formatting (no #, *, \`, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).`;
+Return a structured analysis using plain text without markdown formatting (no #, *, \`, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-). 
+
+IMPORTANT: End your response with "CONFIDENCE SCORE: X%" where X is your confidence level (0-100) in the accuracy and completeness of this analysis.`;
 
     const userMessage = `Analyze this clinical text and extract structured medical information:
 
@@ -316,10 +327,11 @@ Extraction Type: ${extractionType}
 Please provide comprehensive extraction with reasoning for each identified entity.`;
 
     const extractedData = await callClaudeAPI(systemPrompt, userMessage);
+    const confidence = extractConfidence(extractedData);
 
     res.json({
       extractedData,
-      confidence: 0.95,
+      confidence: confidence,
       processingType: extractionType,
       timestamp: new Date().toISOString()
     });
@@ -367,7 +379,9 @@ OUTPUT REQUIREMENTS:
 - Recommendations for further investigation
 - Statistical confidence where applicable
 
-FORMAT: Use plain text without markdown formatting (no #, *, \`, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).`;
+FORMAT: Use plain text without markdown formatting (no #, *, \`, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).
+
+IMPORTANT: End your response with "CONFIDENCE SCORE: X%" where X is your confidence level (0-100) in the reliability of these pattern findings.`;
 
     const userMessage = `Analyze this medical data for patterns and correlations:
 
@@ -378,11 +392,12 @@ Analysis Type: ${analysisType}
 Please identify meaningful patterns and provide clinical insights with reasoning.`;
 
     const patterns = await callClaudeAPI(systemPrompt, userMessage);
+    const confidence = extractConfidence(patterns);
 
     res.json({
       patterns,
       analysisType,
-      confidence: 0.90,
+      confidence: confidence,
       recommendations: [],
       timestamp: new Date().toISOString()
     });
@@ -436,7 +451,9 @@ OUTPUT FORMAT:
 - Use plain text without markdown formatting (no #, *, \`, etc.)
 - Use clear section headings in CAPS
 - Use simple bullet points with dashes (-)
-- Write in clear, professional medical language`;
+- Write in clear, professional medical language
+
+IMPORTANT: End your response with "CONFIDENCE SCORE: X%" where X is your confidence level (0-100) in this clinical recommendation.`;
 
     const userMessage = `Generate a response with comprehensive reasoning:
 
@@ -473,12 +490,13 @@ Please provide your response with detailed reasoning and transparency as specifi
     };
 
     const reasoning = parseReasoning(decision);
+    const confidence = extractConfidence(decision);
 
     res.json({
       decision,
       reasoning: {
         ...reasoning,
-        confidence: 0.88
+        confidence: confidence
       },
       decisionType,
       timestamp: new Date().toISOString()
