@@ -448,15 +448,37 @@ Please provide your response with detailed reasoning and transparency as specifi
 
     const decision = await callClaudeAPI(systemPrompt, userMessage);
 
+    // Parse the structured response to extract key sections
+    const parseReasoning = (text) => {
+      const sections = {
+        summary: extractSection(text, ['DECISION SUMMARY', 'SUMMARY', 'RECOMMENDATION']),
+        rationale: extractSection(text, ['PRIMARY RATIONALE', 'RATIONALE', 'REASONING']),
+        evidence: extractSection(text, ['SUPPORTING EVIDENCE', 'EVIDENCE', 'RESEARCH']),
+        alternatives: extractSection(text, ['ALTERNATIVES CONSIDERED', 'ALTERNATIVES', 'OTHER OPTIONS']),
+        risks: extractSection(text, ['RISK ASSESSMENT', 'RISKS', 'SAFETY'])
+      };
+      
+      return sections;
+    };
+
+    const extractSection = (text, headings) => {
+      for (const heading of headings) {
+        const regex = new RegExp(`${heading}:?\\s*([\\s\\S]*?)(?=\\n\\n[A-Z\\s]+:|$)`, 'i');
+        const match = text.match(regex);
+        if (match && match[1]) {
+          return match[1].trim().substring(0, 200) + '...';
+        }
+      }
+      return "See full analysis above";
+    };
+
+    const reasoning = parseReasoning(decision);
+
     res.json({
       decision,
       reasoning: {
-        summary: "Extracted from Claude response",
-        rationale: "Extracted from Claude response", 
-        evidence: "Extracted from Claude response",
-        alternatives: "Extracted from Claude response",
-        confidence: 0.88,
-        risks: "Extracted from Claude response"
+        ...reasoning,
+        confidence: 0.88
       },
       decisionType,
       timestamp: new Date().toISOString()
