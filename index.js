@@ -483,7 +483,7 @@ Please provide your response with detailed reasoning and transparency as specifi
         const regex = new RegExp(`${heading}:?\\s*([\\s\\S]*?)(?=\\n\\n[A-Z\\s]+:|$)`, 'i');
         const match = text.match(regex);
         if (match && match[1]) {
-          return match[1].trim().substring(0, 200) + '...';
+          return match[1].trim(); // Remove truncation - show full section
         }
       }
       return "See full analysis above";
