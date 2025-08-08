@@ -305,7 +305,7 @@ ENHANCED PROCESSING REQUIREMENTS:
 - Provide structured JSON output for easy integration
 
 OUTPUT FORMAT:
-Return a structured analysis using plain text without markdown formatting (no #, *, `, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).`;
+Return a structured analysis using plain text without markdown formatting (no #, *, \`, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).`;
 
     const userMessage = `Analyze this clinical text and extract structured medical information:
 
@@ -367,7 +367,7 @@ OUTPUT REQUIREMENTS:
 - Recommendations for further investigation
 - Statistical confidence where applicable
 
-FORMAT: Use plain text without markdown formatting (no #, *, `, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).`;
+FORMAT: Use plain text without markdown formatting (no #, *, \`, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).`;
 
     const userMessage = `Analyze this medical data for patterns and correlations:
 
@@ -433,7 +433,7 @@ TRANSPARENCY PRINCIPLES:
 - Provide both technical and patient-friendly explanations when relevant
 
 OUTPUT FORMAT:
-- Use plain text without markdown formatting (no #, *, `, etc.)
+- Use plain text without markdown formatting (no #, *, \`, etc.)
 - Use clear section headings in CAPS
 - Use simple bullet points with dashes (-)
 - Write in clear, professional medical language`;
