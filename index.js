@@ -25,7 +25,7 @@ const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 // Claude API Configuration
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
 const CLAUDE_CONFIG = {
-  model: "claude-3-sonnet-20240229",
+  model: "claude-3-5-sonnet-20241022",
   max_tokens: 4096,
   temperature: 0.3
 };
