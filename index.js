@@ -251,7 +251,14 @@ const callClaudeAPI = async (systemPrompt, userMessage, maxTokens = 4096) => {
       }
     });
 
-    return response.data.content[0].text;
+    // Remove markdown formatting for cleaner output
+    let cleanText = response.data.content[0].text;
+    cleanText = cleanText.replace(/#{1,6}\s*/g, ''); // Remove headers
+    cleanText = cleanText.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove bold
+    cleanText = cleanText.replace(/\*(.*?)\*/g, '$1'); // Remove italics
+    cleanText = cleanText.replace(/`{1,3}(.*?)`{1,3}/g, '$1'); // Remove code blocks
+    
+    return cleanText;
   } catch (error) {
     console.error('Claude API Error:', error.response?.data || error.message);
     throw new Error(`Claude API failed: ${error.response?.data?.error?.message || error.message}`);
@@ -413,7 +420,13 @@ TRANSPARENCY PRINCIPLES:
 - Be explicit about uncertainty where it exists
 - Acknowledge when evidence is limited
 - Explain complex medical concepts in understandable terms
-- Provide both technical and patient-friendly explanations when relevant`;
+- Provide both technical and patient-friendly explanations when relevant
+
+OUTPUT FORMAT:
+- Use plain text without markdown formatting (no #, *, `, etc.)
+- Use clear section headings in CAPS
+- Use simple bullet points with dashes (-)
+- Write in clear, professional medical language`;
 
     const userMessage = `Generate a response with comprehensive reasoning:
 
