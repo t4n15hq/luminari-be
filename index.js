@@ -305,7 +305,7 @@ ENHANCED PROCESSING REQUIREMENTS:
 - Provide structured JSON output for easy integration
 
 OUTPUT FORMAT:
-Return a structured JSON object with extracted entities, confidence scores, and clinical reasoning.`;
+Return a structured analysis using plain text without markdown formatting (no #, *, `, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).`;
 
     const userMessage = `Analyze this clinical text and extract structured medical information:
 
@@ -365,7 +365,9 @@ OUTPUT REQUIREMENTS:
 - Clear pattern descriptions with supporting evidence
 - Clinical interpretation and significance
 - Recommendations for further investigation
-- Statistical confidence where applicable`;
+- Statistical confidence where applicable
+
+FORMAT: Use plain text without markdown formatting (no #, *, `, etc.). Use clear section headings in CAPS and simple bullet points with dashes (-).`;
 
     const userMessage = `Analyze this medical data for patterns and correlations:
 
