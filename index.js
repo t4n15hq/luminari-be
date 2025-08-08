@@ -253,10 +253,18 @@ const callClaudeAPI = async (systemPrompt, userMessage, maxTokens = 4096) => {
 
     // Remove markdown formatting for cleaner output
     let cleanText = response.data.content[0].text;
-    cleanText = cleanText.replace(/#{1,6}\s*/g, ''); // Remove headers
-    cleanText = cleanText.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove bold
-    cleanText = cleanText.replace(/\*(.*?)\*/g, '$1'); // Remove italics
-    cleanText = cleanText.replace(/`{1,3}(.*?)`{1,3}/g, '$1'); // Remove code blocks
+    
+    // Remove markdown headers (# ## ### etc at start of lines)
+    cleanText = cleanText.replace(/^#{1,6}\s+/gm, '');
+    
+    // Remove bold formatting **text**
+    cleanText = cleanText.replace(/\*\*(.*?)\*\*/g, '$1');
+    
+    // Remove inline code `text`
+    cleanText = cleanText.replace(/`([^`]+)`/g, '$1');
+    
+    // Remove code blocks ```text```
+    cleanText = cleanText.replace(/```[\s\S]*?```/g, '');
     
     return cleanText;
   } catch (error) {
